@@ -103,6 +103,11 @@ const revealTransition = {
   duration: 0.46,
   ease: [0.22, 0.61, 0.36, 1],
 }
+const contactLinks = [
+  { label: 'Email', href: `mailto:${P.email}`, icon: Mail },
+  { label: 'LinkedIn', href: P.linkedin, icon: Linkedin },
+  { label: 'GitHub', href: P.github, icon: Github },
+]
 function ScrollProgress() {
   useEffect(() => {
     let frame = 0
@@ -253,7 +258,7 @@ function Technology({ name, index = 0 }) {
     </motion.span>
   )
 }
-function Navbar() {
+function Navbar({ onHire }) {
   const [theme, toggle] = useTheme(),
     [open, setOpen] = useState(false),
     [scrolled, setS] = useState(false),
@@ -282,7 +287,9 @@ function Navbar() {
     return () => o.disconnect()
   }, [])
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
+    if (!open) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const k = (e) => {
       if (e.key === 'Escape') {
         setOpen(false)
@@ -292,7 +299,7 @@ function Navbar() {
     window.addEventListener('keydown', k)
     return () => {
       window.removeEventListener('keydown', k)
-      document.body.style.overflow = ''
+      document.body.style.overflow = previousOverflow
     }
   }, [open])
   return (
@@ -359,9 +366,10 @@ function Navbar() {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </motion.button>
-            <motion.a
-              href="#contact"
+            <motion.button
+              type="button"
               className="btn pri nav-cta"
+              onClick={onHire}
               whileHover={
                 reduced
                   ? undefined
@@ -377,9 +385,9 @@ function Navbar() {
                     }
               }
             >
-              <span className="nav-cta-full">Get in Touch</span>
-              <span className="nav-cta-compact">Contact</span>
-            </motion.a>
+              <span className="nav-cta-full">Hire Me</span>
+              <span className="nav-cta-compact">Hire</span>
+            </motion.button>
             <button
               ref={btn}
               className="btn xl:hidden nav-icon-button"
@@ -457,7 +465,7 @@ function Navbar() {
     </motion.header>
   )
 }
-function Hero() {
+function Hero({ onHire }) {
   const rm = useReducedMotion()
   const heroContainer = {
     visible: {
@@ -520,8 +528,12 @@ function Hero() {
                 <ArrowUpRight size={17} />
               </motion.a>
               <motion.a
-                className="btn"
-                href="#experience"
+                className="btn hire-hero-button"
+                href="#hire-modal"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onHire()
+                }}
                 whileHover={
                   rm
                     ? undefined
@@ -537,8 +549,8 @@ function Hero() {
                       }
                 }
               >
-                Explore My Experience
-                <ArrowUpRight size={17} />
+                Hire Me
+                <BriefcaseBusiness size={16} />
               </motion.a>
             </motion.div>
             <motion.div
@@ -624,6 +636,132 @@ function Hero() {
         </a>
       </div>
     </section>
+  )
+}
+function HireModal({ open, onClose }) {
+  const reduced = useReducedMotion()
+  const dialogRef = useRef(null)
+  const closeRef = useRef(null)
+  useEffect(() => {
+    if (!open) return
+    const previousActiveElement = document.activeElement
+    const previousOverflow = document.body.style.overflow
+    const inertElements = [...document.querySelectorAll('main, .site-header, .site-footer')]
+    const previousInert = inertElements.map((element) => element.inert)
+    document.body.style.overflow = 'hidden'
+    inertElements.forEach((element) => {
+      element.inert = true
+    })
+    const frame = requestAnimationFrame(() => closeRef.current?.focus())
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusable = [
+        ...dialogRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ),
+      ].filter((element) => element.getClientRects().length > 0)
+      if (focusable.length === 0) {
+        event.preventDefault()
+        dialogRef.current.focus()
+        return
+      }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      cancelAnimationFrame(frame)
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+      inertElements.forEach((element, index) => {
+        element.inert = previousInert[index]
+      })
+      if (previousActiveElement instanceof HTMLElement && previousActiveElement.isConnected) {
+        previousActiveElement.focus()
+      }
+    }
+  }, [open, onClose])
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="hire-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduced ? 0 : 0.2 }}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) onClose()
+          }}
+        >
+          <motion.section
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="hire-modal-title"
+            aria-describedby="hire-modal-description"
+            tabIndex={-1}
+            className="hire-modal"
+            initial={reduced ? false : { opacity: 0, y: 18, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduced ? undefined : { opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ duration: reduced ? 0 : 0.24, ease: [0.2, 0.75, 0.25, 1] }}
+          >
+            <div className="hire-modal-top">
+              <span className="hire-modal-kicker">
+                <span className="availability-dot" />
+                OPEN TO OPPORTUNITIES
+              </span>
+              <button
+                ref={closeRef}
+                className="btn nav-icon-button hire-modal-close"
+                type="button"
+                onClick={onClose}
+                aria-label="Close Hire Me dialog"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <h2 id="hire-modal-title">Let’s build something useful.</h2>
+            <p id="hire-modal-description" className="muted hire-modal-copy">
+              I’m Rajkaran, an early-career software engineer focused on full-stack development. I’m
+              open to fresher opportunities, internships, and junior engineering roles where I can
+              contribute, learn, and grow with a team.
+            </p>
+            <div className="hire-modal-links" aria-label="Contact and professional profiles">
+              {contactLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  className="hire-contact-link"
+                  href={href}
+                  {...(label === 'Email' ? {} : externalProps)}
+                >
+                  <Icon size={18} aria-hidden="true" />
+                  <span>{label}</span>
+                  {label !== 'Email' && <ExternalLink size={14} aria-hidden="true" />}
+                </a>
+              ))}
+            </div>
+            <a className="btn pri hire-modal-cta" href={`mailto:${P.email}`}>
+              Contact me about an opportunity
+              <ArrowUpRight size={17} />
+            </a>
+          </motion.section>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 function Skills() {
@@ -1219,12 +1357,14 @@ function Footer() {
   )
 }
 export default function App() {
+  const [hireOpen, setHireOpen] = useState(false)
+  const closeHire = () => setHireOpen(false)
   return (
     <>
       <ScrollProgress />
-      <Navbar />
+      <Navbar onHire={() => setHireOpen(true)} />
       <main>
-        <Hero />
+        <Hero onHire={() => setHireOpen(true)} />
         <About />
         <Skills />
         <Experience />
@@ -1234,6 +1374,7 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
+      <HireModal open={hireOpen} onClose={closeHire} />
     </>
   )
 }
