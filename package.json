@@ -1,0 +1,27 @@
+{
+  "name": "rajkaran-portfolio",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{js,jsx,css}\" index.html vite.config.js package.json README.md .prettierrc.json",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\" index.html vite.config.js package.json README.md .prettierrc.json"
+  },
+  "dependencies": {
+    "framer-motion": "11.11.17",
+    "lucide-react": "0.454.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "simple-icons": "^16.35.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.1.4",
+    "@vitejs/plugin-react": "4.3.3",
+    "prettier": "^3.9.10",
+    "tailwindcss": "4.1.4",
+    "vite": "5.4.10"
+  }
+}
