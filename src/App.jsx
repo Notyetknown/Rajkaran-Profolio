@@ -369,7 +369,10 @@ function Navbar({ onHire }) {
             <motion.button
               type="button"
               className="btn pri nav-cta"
-              onClick={onHire}
+              onClick={() => {
+                setOpen(false)
+                onHire()
+              }}
               whileHover={
                 reduced
                   ? undefined
@@ -529,7 +532,7 @@ function Hero({ onHire }) {
               </motion.a>
               <motion.a
                 className="btn hire-hero-button"
-                href="#hire-modal"
+                href="#contact"
                 onClick={(event) => {
                   event.preventDefault()
                   onHire()
@@ -1142,7 +1145,7 @@ function LeetCode() {
     </section>
   )
 }
-function Contact() {
+function Contact({ onSubmitted }) {
   const reduced = useReducedMotion()
   const [formValues, setFormValues] = useState(initialContactForm)
   const [errors, setErrors] = useState({})
@@ -1197,6 +1200,7 @@ function Contact() {
       setFormValues(initialContactForm)
       setErrors({})
       setStatus('Thanks for reaching out. Your message has been sent successfully.')
+      onSubmitted()
     } catch (error) {
       console.error('Contact form submission failed:', error)
       setStatus('Unable to send your message right now. Please try again or email me directly.')
@@ -1217,7 +1221,9 @@ function Contact() {
     <section id="contact" className="dark-band">
       <ScrollReveal className="wrap grid md:grid-cols-2 gap-12">
         <div>
-          <h2>Let's Talk</h2>
+          <h2 id="contact-heading" tabIndex={-1}>
+            Let's Talk
+          </h2>
           <p className="muted contact-intro">
             I'm open to internships, junior roles and project work. Send a note about what you're
             building and I'll reply by email.
@@ -1358,20 +1364,28 @@ function Footer() {
 }
 export default function App() {
   const [hireOpen, setHireOpen] = useState(false)
+  const reduced = useReducedMotion()
   const closeHire = () => setHireOpen(false)
+  const goToContact = () => {
+    document.getElementById('contact')?.scrollIntoView({
+      behavior: reduced ? 'auto' : 'smooth',
+      block: 'start',
+    })
+    document.getElementById('contact-heading')?.focus({ preventScroll: true })
+  }
   return (
     <>
       <ScrollProgress />
-      <Navbar onHire={() => setHireOpen(true)} />
+      <Navbar onHire={goToContact} />
       <main>
-        <Hero onHire={() => setHireOpen(true)} />
+        <Hero onHire={goToContact} />
         <About />
         <Skills />
         <Experience />
         <Projects />
         <Certificates />
         <LeetCode />
-        <Contact />
+        <Contact onSubmitted={() => setHireOpen(true)} />
       </main>
       <Footer />
       <HireModal open={hireOpen} onClose={closeHire} />

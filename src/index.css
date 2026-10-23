@@ -2208,14 +2208,37 @@ section {
   .hire-modal-top {
     margin-bottom: 22px;
   }
+  .hire-modal-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hire-contact-link {
+    padding-inline: 8px;
+    font-size: 0.8rem;
+  }
 }
 @media (max-width: 360px) {
   .hire-modal-links {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .hire-contact-link {
-    justify-content: flex-start;
-    padding-inline: 14px;
+    padding-inline: 6px;
+    font-size: 0.76rem;
+  }
+  .hire-modal {
+    padding: 16px;
+  }
+  .hire-modal-top {
+    margin-bottom: 16px;
+  }
+  .hire-modal h2 {
+    font-size: clamp(1.75rem, 9vw, 2rem);
+  }
+  .hire-modal-copy {
+    margin: 14px 0 16px;
+    line-height: 1.5;
+  }
+  .hire-modal-links {
+    margin-bottom: 16px;
   }
   #experience .learning-steps strong {
     margin-top: 3px;
